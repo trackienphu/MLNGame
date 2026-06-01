@@ -52,6 +52,11 @@ export type UiCopy = {
   emptyLibraryDescription: string;
   profile: string;
   readFullStory: string;
+  specialStageLabel: string;
+  specialStageTitle: string;
+  specialStageDescription: string;
+  specialStageUnlocked: string;
+  specialStageProfile: string;
 };
 
 export const uiCopy: Record<Locale, UiCopy> = {
@@ -102,6 +107,12 @@ export const uiCopy: Record<Locale, UiCopy> = {
     emptyLibraryDescription: "Hoàn thành màn Socrates để mở câu chuyện đầu tiên.",
     profile: "Hồ sơ",
     readFullStory: "Đọc câu chuyện đầy đủ",
+    specialStageLabel: "Màn chơi đặc biệt",
+    specialStageTitle: "Thử thách Hannah Arendt",
+    specialStageDescription:
+      "Một chân dung ngoài tuyến chính với 400 mảnh ghép. Màn đặc biệt luôn mở khóa và không ảnh hưởng tiến độ 15 màn thường.",
+    specialStageUnlocked: "Luôn mở khóa",
+    specialStageProfile: "Hồ sơ đặc biệt",
   },
   en: {
     languageSwitcherLabel: "Choose language",
@@ -150,6 +161,12 @@ export const uiCopy: Record<Locale, UiCopy> = {
     emptyLibraryDescription: "Complete the Socrates stage to unlock the first story.",
     profile: "Profile",
     readFullStory: "Read the full story",
+    specialStageLabel: "Special stage",
+    specialStageTitle: "The Hannah Arendt challenge",
+    specialStageDescription:
+      "An off-path portrait with 400 tiles. This special stage is always unlocked and does not affect progress through the 15 regular stages.",
+    specialStageUnlocked: "Always unlocked",
+    specialStageProfile: "Special profile",
   },
 };
 
@@ -619,16 +636,113 @@ const englishStages: PhilosopherStage[] = vietnameseStages.map((stage) => {
   };
 });
 
+const vietnameseSpecialDifficulty: Difficulty = {
+  id: 6,
+  title: "Màn chơi đặc biệt",
+  subtitle: "Một thử thách ngoài tuyến chính",
+  gridSize: 20,
+  scrambleMoves: 2400,
+  starTimes: { three: 900, two: 1800 },
+};
+
+const englishSpecialDifficulty: Difficulty = {
+  ...vietnameseSpecialDifficulty,
+  title: "Special stage",
+  subtitle: "An off-path challenge",
+};
+
+const vietnameseSpecialStage: PhilosopherStage = {
+  id: "arendt",
+  order: 16,
+  levelId: vietnameseSpecialDifficulty.id,
+  name: "Hannah Arendt",
+  era: "1906-1975",
+  origin: "Hannover, Đức và New York, Hoa Kỳ",
+  image: "/portraits/arendt.png",
+  idea: "Tư duy và phán đoán giúp con người giữ trách nhiệm trước thế giới chung mà họ cùng tạo nên.",
+  story: {
+    summary:
+      "Hannah Arendt là một trong những nhà tư tưởng chính trị có ảnh hưởng lớn của thế kỷ XX. Từ trải nghiệm lưu vong, bà viết về chủ nghĩa toàn trị, đời sống công cộng, hành động, tự do và trách nhiệm phán đoán trong một thế giới được con người cùng chia sẻ.",
+    chapters: [
+      {
+        title: "Từ Hannover đến đời sống lưu vong",
+        body:
+          "Arendt sinh năm 1906 trong một gia đình Do Thái-Đức. Bà học với Martin Heidegger, Edmund Husserl và Karl Jaspers, hoàn thành luận án dưới sự hướng dẫn của Jaspers năm 1929. Sau khi Hitler lên nắm quyền, bà phải rời Đức năm 1933, sống nhiều năm tại Paris và đến New York cùng gia đình năm 1941.",
+      },
+      {
+        title: "Chủ nghĩa toàn trị và thế giới chung",
+        body:
+          "Nguồn gốc của chủ nghĩa toàn trị năm 1951 nghiên cứu chế độ Quốc xã và Stalinist như những hiện tượng chính trị đòi hỏi một cách hiểu mới. Trong Điều kiện con người năm 1958, Arendt phân tích lao động, việc làm và hành động, đồng thời nhấn mạnh ý nghĩa của không gian công cộng nơi con người xuất hiện trước nhau như những cá nhân khác biệt.",
+      },
+      {
+        title: "Tư duy, phán đoán và tranh luận về cái ác",
+        body:
+          "Năm 1961, Arendt theo dõi phiên tòa Adolf Eichmann tại Jerusalem với tư cách phóng viên của The New Yorker. Cuốn Eichmann ở Jerusalem năm 1963 đưa ra cụm từ gây tranh luận \"sự tầm thường của cái ác\". Những tác phẩm cuối đời tiếp tục khảo sát tư duy, ý chí và phán đoán như các năng lực có ý nghĩa đạo đức và chính trị.",
+      },
+    ],
+    works: [
+      "Nguồn gốc của chủ nghĩa toàn trị",
+      "Điều kiện con người",
+      "Eichmann ở Jerusalem",
+      "Đời sống tinh thần",
+    ],
+    sourceUrl: "https://plato.stanford.edu/entries/arendt/",
+  },
+};
+
+const englishSpecialStage: PhilosopherStage = {
+  ...vietnameseSpecialStage,
+  origin: "Hannover, Germany and New York, United States",
+  idea: "Thinking and judgment help people remain responsible for the common world they create together.",
+  story: {
+    summary:
+      "Hannah Arendt was one of the most influential political thinkers of the twentieth century. Drawing on the experience of exile, she wrote about totalitarianism, public life, action, freedom and the responsibility to judge within a world that people share.",
+    chapters: [
+      {
+        title: "From Hannover into exile",
+        body:
+          "Arendt was born in 1906 into a German-Jewish family. She studied with Martin Heidegger, Edmund Husserl and Karl Jaspers, completing her dissertation under Jaspers in 1929. After Hitler rose to power, she was forced to leave Germany in 1933, lived for years in Paris and reached New York with her family in 1941.",
+      },
+      {
+        title: "Totalitarianism and the common world",
+        body:
+          "The Origins of Totalitarianism, published in 1951, studied the Nazi and Stalinist regimes as political phenomena demanding a new framework of understanding. In The Human Condition in 1958, Arendt analyzed labor, work and action while stressing the importance of a public realm where people appear before one another as distinct individuals.",
+      },
+      {
+        title: "Thinking, judgment and the controversy over evil",
+        body:
+          "In 1961, Arendt attended the trial of Adolf Eichmann in Jerusalem as a reporter for The New Yorker. Eichmann in Jerusalem, published in 1963, introduced the controversial phrase \"the banality of evil\". Her final works continued to examine thinking, willing and judging as faculties with moral and political significance.",
+      },
+    ],
+    works: [
+      "The Origins of Totalitarianism",
+      "The Human Condition",
+      "Eichmann in Jerusalem",
+      "The Life of the Mind",
+    ],
+    sourceUrl: vietnameseSpecialStage.story.sourceUrl,
+  },
+};
+
 export const localizedContent: Record<
   Locale,
-  { difficulties: Difficulty[]; stages: PhilosopherStage[] }
+  {
+    difficulties: Difficulty[];
+    stages: PhilosopherStage[];
+    specialDifficulty: Difficulty;
+    specialStage: PhilosopherStage;
+  }
 > = {
   vi: {
     difficulties: vietnameseDifficulties,
     stages: vietnameseStages,
+    specialDifficulty: vietnameseSpecialDifficulty,
+    specialStage: vietnameseSpecialStage,
   },
   en: {
     difficulties: englishDifficulties,
     stages: englishStages,
+    specialDifficulty: englishSpecialDifficulty,
+    specialStage: englishSpecialStage,
   },
 };

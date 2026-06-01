@@ -267,6 +267,103 @@ button:focus-visible {
   margin-top: 26px;
 }
 
+.special-stage {
+  margin: 0 auto 36px;
+  max-width: 1240px;
+}
+
+.special-stage-heading {
+  align-items: end;
+  display: flex;
+  gap: 34px;
+  justify-content: space-between;
+  margin-bottom: 17px;
+}
+
+.special-stage-heading h2 {
+  color: #f3e8d3;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: clamp(1.75rem, 3vw, 2.55rem);
+  font-weight: 500;
+  letter-spacing: -0.06em;
+  line-height: 1;
+  margin: 13px 0 0;
+}
+
+.special-stage-heading > p {
+  color: #a39887;
+  font-size: 0.82rem;
+  line-height: 1.7;
+  margin: 0;
+  max-width: 520px;
+}
+
+.special-stage-card {
+  align-items: center;
+  background:
+    linear-gradient(110deg, rgba(139, 75, 39, 0.28), transparent 46%),
+    rgba(27, 24, 25, 0.9);
+  border: 1px solid rgba(233, 191, 118, 0.28);
+  border-radius: 12px;
+  display: grid;
+  gap: 22px;
+  grid-template-columns: 112px minmax(0, 1fr) auto;
+  padding: 13px 19px 13px 13px;
+  text-align: left;
+  transition: background 170ms ease, border-color 170ms ease, transform 170ms ease;
+  width: 100%;
+}
+
+.special-stage-card:hover {
+  background:
+    linear-gradient(110deg, rgba(139, 75, 39, 0.38), transparent 52%),
+    rgba(40, 34, 32, 0.94);
+  border-color: rgba(233, 191, 118, 0.48);
+  transform: translateY(-2px);
+}
+
+.special-stage-image {
+  aspect-ratio: 1;
+  border-radius: 7px;
+  display: block;
+  overflow: hidden;
+  position: relative;
+}
+
+.special-stage-image img {
+  object-fit: cover;
+}
+
+.special-stage-details {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+}
+
+.special-stage-details strong {
+  color: #f4e7d1;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.65rem;
+  font-weight: 500;
+  letter-spacing: -0.045em;
+}
+
+.special-stage-meta {
+  color: #a99d8a;
+  font-size: 0.75rem;
+}
+
+.special-stage-size {
+  border: 1px solid rgba(233, 191, 118, 0.34);
+  border-radius: 999px;
+  color: var(--gold-light);
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.08rem;
+  padding: 11px 15px;
+  white-space: nowrap;
+}
+
 .levels {
   display: grid;
   gap: 36px;
@@ -731,6 +828,28 @@ button:focus-visible {
   width: min(66vh, 620px);
 }
 
+.puzzle-board.dense {
+  gap: 1px;
+}
+
+.puzzle-board.dense .puzzle-tile,
+.puzzle-board.dense .puzzle-empty {
+  border-radius: 1px;
+}
+
+.puzzle-board.dense .puzzle-tile {
+  padding: 0;
+}
+
+.puzzle-board.dense .puzzle-tile span {
+  border-radius: 2px;
+  font-size: 0.42rem;
+  height: 12px;
+  min-width: 12px;
+  padding: 0 1px;
+  width: auto;
+}
+
 .puzzle-tile,
 .puzzle-empty {
   aspect-ratio: 1;
@@ -1042,6 +1161,37 @@ button:focus-visible {
 
   .story-library {
     margin-top: 55px;
+  }
+
+  .special-stage-heading {
+    align-items: start;
+    flex-direction: column;
+    gap: 11px;
+  }
+
+  .special-stage-card {
+    gap: 13px;
+    grid-template-columns: 86px minmax(0, 1fr);
+    padding: 11px;
+  }
+
+  .special-stage-details {
+    gap: 5px;
+  }
+
+  .special-stage-details strong {
+    font-size: 1.3rem;
+  }
+
+  .special-stage-meta {
+    font-size: 0.68rem;
+  }
+
+  .special-stage-size {
+    font-size: 0.88rem;
+    grid-column: 1 / -1;
+    justify-self: start;
+    padding: 7px 11px;
   }
 
   .library-heading {

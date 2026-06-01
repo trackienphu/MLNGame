@@ -102,6 +102,16 @@ function getDifficulty(levelId: number, difficulties: Difficulty[]) {
   return difficulties.find((difficulty) => difficulty.id === levelId) ?? difficulties[0];
 }
 
+function getStageDifficulty(
+  stage: PhilosopherStage,
+  difficulties: Difficulty[],
+  specialDifficulty: Difficulty,
+) {
+  return stage.levelId === specialDifficulty.id
+    ? specialDifficulty
+    : getDifficulty(stage.levelId, difficulties);
+}
+
 function isUnlocked(index: number, progress: Progress, stages: PhilosopherStage[]) {
   return index === 0 || Boolean(progress[stages[index - 1].id]);
 }
@@ -263,9 +273,12 @@ export function PhilosopherPuzzleGame() {
   }, [completion, isPlaying]);
 
   const copy = uiCopy[locale];
-  const { difficulties, stages } = localizedContent[locale];
-  const activeStage = stages.find((stage) => stage.id === activeStageId) ?? null;
-  const activeDifficulty = activeStage ? getDifficulty(activeStage.levelId, difficulties) : null;
+  const { difficulties, specialDifficulty, specialStage, stages } = localizedContent[locale];
+  const allStages = useMemo(() => [...stages, specialStage], [specialStage, stages]);
+  const activeStage = allStages.find((stage) => stage.id === activeStageId) ?? null;
+  const activeDifficulty = activeStage
+    ? getStageDifficulty(activeStage, difficulties, specialDifficulty)
+    : null;
 
   const stats = useMemo(() => {
     const finished = stages.filter((stage) => Boolean(progress[stage.id])).length;
@@ -273,9 +286,10 @@ export function PhilosopherPuzzleGame() {
     return { finished, stars };
   }, [progress, stages]);
   const discoveredStages = useMemo(
-    () => stages.filter((stage) => Boolean(progress[stage.id])),
-    [progress, stages],
+    () => allStages.filter((stage) => Boolean(progress[stage.id])),
+    [allStages, progress],
   );
+  const specialRecord = progress[specialStage.id];
 
   function persistProgress(nextProgress: Progress) {
     setProgress(nextProgress);
@@ -283,7 +297,7 @@ export function PhilosopherPuzzleGame() {
   }
 
   function startStage(stage: PhilosopherStage) {
-    const difficulty = getDifficulty(stage.levelId, difficulties);
+    const difficulty = getStageDifficulty(stage, difficulties, specialDifficulty);
     setActiveStageId(stage.id);
     setTiles(shuffleBoard(difficulty.gridSize, difficulty.scrambleMoves));
     setMoves(0);
@@ -295,7 +309,10 @@ export function PhilosopherPuzzleGame() {
   }
 
   function finishStage(stage: PhilosopherStage, seconds: number) {
-    const earnedStars = calculateStars(seconds, getDifficulty(stage.levelId, difficulties));
+    const earnedStars = calculateStars(
+      seconds,
+      getStageDifficulty(stage, difficulties, specialDifficulty),
+    );
     const previous = progress[stage.id];
     const nextProgress = {
       ...progress,
@@ -348,7 +365,7 @@ export function PhilosopherPuzzleGame() {
 
   if (activeStage && activeDifficulty) {
     const currentIndex = stages.findIndex((stage) => stage.id === activeStage.id);
-    const nextStage = stages[currentIndex + 1] ?? null;
+    const nextStage = currentIndex >= 0 ? stages[currentIndex + 1] ?? null : null;
     const gridStyle = {
       gridTemplateColumns: `repeat(${activeDifficulty.gridSize}, minmax(0, 1fr))`,
     } satisfies CSSProperties;
@@ -360,7 +377,9 @@ export function PhilosopherPuzzleGame() {
             {copy.chooseStage}
           </button>
           <div className="chapter-marker">
-            {copy.level} {activeDifficulty.id} / {copy.stage} {activeStage.order}
+            {activeStage.id === specialStage.id
+              ? copy.specialStageLabel
+              : `${copy.level} ${activeDifficulty.id} / ${copy.stage} ${activeStage.order}`}
           </div>
           <div className="play-header-actions">
             <LanguageSwitcher copy={copy} locale={locale} onChange={changeLocale} />
@@ -406,7 +425,10 @@ export function PhilosopherPuzzleGame() {
             </div>
 
             <div className="puzzle-frame">
-              <div className="puzzle-board" style={gridStyle}>
+              <div
+                className={`puzzle-board ${activeDifficulty.gridSize >= 10 ? "dense" : ""}`}
+                style={gridStyle}
+              >
                 {tiles.map((tile, index) =>
                   tile === null ? (
                     <div className="puzzle-empty" key="empty" aria-hidden="true" />
@@ -523,6 +545,34 @@ export function PhilosopherPuzzleGame() {
         </div>
       </header>
 
+      <section className="special-stage" aria-label={copy.specialStageLabel}>
+        <header className="special-stage-heading">
+          <div>
+            <p className="eyebrow">{copy.specialStageLabel}</p>
+            <h2>{copy.specialStageTitle}</h2>
+          </div>
+          <p>{copy.specialStageDescription}</p>
+        </header>
+        <button className="special-stage-card" onClick={() => startStage(specialStage)}>
+          <span className="special-stage-image">
+            <Image src={specialStage.image} alt="" fill sizes="112px" />
+          </span>
+          <span className="special-stage-details">
+            <span className="stage-index">{copy.specialStageUnlocked}</span>
+            <strong>{specialStage.name}</strong>
+            <span className="special-stage-meta">
+              {specialStage.era} · {specialStage.origin}
+            </span>
+            {specialRecord
+              ? <Stars copy={copy} count={specialRecord.stars} />
+              : <span className="unplayed">{copy.undiscovered}</span>}
+          </span>
+          <span className="special-stage-size">
+            {specialDifficulty.gridSize} × {specialDifficulty.gridSize}
+          </span>
+        </button>
+      </section>
+
       <section className="levels" aria-label={copy.levelList}>
         {difficulties.map((difficulty) => {
           const levelStages = stages.filter((stage) => stage.levelId === difficulty.id);
@@ -591,7 +641,11 @@ export function PhilosopherPuzzleGame() {
                   <Image src={stage.image} alt="" fill sizes="112px" />
                 </div>
                 <div className="archive-body">
-                  <p className="stage-index">{copy.profile} {stage.order.toString().padStart(2, "0")}</p>
+                  <p className="stage-index">
+                    {stage.id === specialStage.id
+                      ? copy.specialStageProfile
+                      : `${copy.profile} ${stage.order.toString().padStart(2, "0")}`}
+                  </p>
                   <h3>{stage.name}</h3>
                   <p className="archive-meta">
                     {stage.era} · {stage.origin}
