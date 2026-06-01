@@ -3,12 +3,15 @@
 import Image from "next/image";
 import { type CSSProperties, useEffect, useMemo, useState } from "react";
 import {
-  difficulties,
-  getDifficulty,
-  stages,
   type Difficulty,
   type PhilosopherStage,
 } from "@/data/philosophers";
+import {
+  localizedContent,
+  uiCopy,
+  type Locale,
+  type UiCopy,
+} from "@/data/localization";
 
 type Tile = number | null;
 
@@ -25,6 +28,11 @@ type Completion = {
 };
 
 const STORAGE_KEY = "manh-ghep-minh-triet-progress";
+const LANGUAGE_STORAGE_KEY = "manh-ghep-minh-triet-language";
+const localeOptions: { label: string; value: Locale }[] = [
+  { label: "Tiếng Việt", value: "vi" },
+  { label: "English", value: "en" },
+];
 
 function formatSeconds(seconds: number) {
   const minutes = Math.floor(seconds / 60).toString().padStart(2, "0");
@@ -90,7 +98,11 @@ function calculateStars(seconds: number, difficulty: Difficulty) {
   return 1;
 }
 
-function isUnlocked(index: number, progress: Progress) {
+function getDifficulty(levelId: number, difficulties: Difficulty[]) {
+  return difficulties.find((difficulty) => difficulty.id === levelId) ?? difficulties[0];
+}
+
+function isUnlocked(index: number, progress: Progress, stages: PhilosopherStage[]) {
   return index === 0 || Boolean(progress[stages[index - 1].id]);
 }
 
@@ -111,9 +123,35 @@ function isValidProgress(value: unknown): value is Progress {
   });
 }
 
-function Stars({ count }: { count: number }) {
+function LanguageSwitcher({
+  copy,
+  locale,
+  onChange,
+}: {
+  copy: UiCopy;
+  locale: Locale;
+  onChange: (locale: Locale) => void;
+}) {
   return (
-    <span className="stars" aria-label={`${count} sao`}>
+    <div className="language-switcher" role="group" aria-label={copy.languageSwitcherLabel}>
+      {localeOptions.map((option) => (
+        <button
+          aria-pressed={locale === option.value}
+          className={locale === option.value ? "active" : ""}
+          key={option.value}
+          onClick={() => onChange(option.value)}
+          type="button"
+        >
+          {option.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function Stars({ copy, count }: { copy: UiCopy; count: number }) {
+  return (
+    <span className="stars" aria-label={`${count} ${copy.starsLabel}`}>
       {Array.from({ length: 3 }, (_, index) => (
         <span key={index} className={index < count ? "star-filled" : "star-empty"}>
           ★
@@ -124,9 +162,11 @@ function Stars({ count }: { count: number }) {
 }
 
 function PhilosopherStory({
+  copy,
   stage,
   includeSummary = true,
 }: {
+  copy: UiCopy;
   stage: PhilosopherStage;
   includeSummary?: boolean;
 }) {
@@ -142,7 +182,7 @@ function PhilosopherStory({
         ))}
       </div>
       <div className="story-reading-list">
-        <p>Tác phẩm và cửa ngõ đọc thêm</p>
+        <p>{copy.readingList}</p>
         <ul>
           {stage.story.works.map((work) => (
             <li key={work}>{work}</li>
@@ -155,13 +195,14 @@ function PhilosopherStory({
         rel="noreferrer"
         target="_blank"
       >
-        Đối chiếu nguồn: Stanford Encyclopedia of Philosophy ↗
+        {copy.sourceLink}
       </a>
     </div>
   );
 }
 
 export function PhilosopherPuzzleGame() {
+  const [locale, setLocale] = useState<Locale>("vi");
   const [progress, setProgress] = useState<Progress>({});
   const [progressReady, setProgressReady] = useState(false);
   const [activeStageId, setActiveStageId] = useState<string | null>(null);
@@ -171,6 +212,23 @@ export function PhilosopherPuzzleGame() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [completion, setCompletion] = useState<Completion | null>(null);
   const [showNumbers, setShowNumbers] = useState(true);
+
+  useEffect(() => {
+    const loadSavedLocale = window.setTimeout(() => {
+      const savedLocale = window.localStorage.getItem(LANGUAGE_STORAGE_KEY);
+      const browserLocale = window.navigator.language.toLowerCase().startsWith("vi")
+        ? "vi"
+        : "en";
+
+      setLocale(savedLocale === "vi" || savedLocale === "en" ? savedLocale : browserLocale);
+    }, 0);
+
+    return () => window.clearTimeout(loadSavedLocale);
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.lang = locale;
+  }, [locale]);
 
   useEffect(() => {
     const loadSavedProgress = window.setTimeout(() => {
@@ -204,17 +262,19 @@ export function PhilosopherPuzzleGame() {
     return () => window.clearInterval(timer);
   }, [completion, isPlaying]);
 
+  const copy = uiCopy[locale];
+  const { difficulties, stages } = localizedContent[locale];
   const activeStage = stages.find((stage) => stage.id === activeStageId) ?? null;
-  const activeDifficulty = activeStage ? getDifficulty(activeStage.levelId) : null;
+  const activeDifficulty = activeStage ? getDifficulty(activeStage.levelId, difficulties) : null;
 
   const stats = useMemo(() => {
     const finished = stages.filter((stage) => Boolean(progress[stage.id])).length;
     const stars = stages.reduce((sum, stage) => sum + (progress[stage.id]?.stars ?? 0), 0);
     return { finished, stars };
-  }, [progress]);
+  }, [progress, stages]);
   const discoveredStages = useMemo(
     () => stages.filter((stage) => Boolean(progress[stage.id])),
-    [progress],
+    [progress, stages],
   );
 
   function persistProgress(nextProgress: Progress) {
@@ -223,7 +283,7 @@ export function PhilosopherPuzzleGame() {
   }
 
   function startStage(stage: PhilosopherStage) {
-    const difficulty = getDifficulty(stage.levelId);
+    const difficulty = getDifficulty(stage.levelId, difficulties);
     setActiveStageId(stage.id);
     setTiles(shuffleBoard(difficulty.gridSize, difficulty.scrambleMoves));
     setMoves(0);
@@ -235,7 +295,7 @@ export function PhilosopherPuzzleGame() {
   }
 
   function finishStage(stage: PhilosopherStage, seconds: number) {
-    const earnedStars = calculateStars(seconds, getDifficulty(stage.levelId));
+    const earnedStars = calculateStars(seconds, getDifficulty(stage.levelId, difficulties));
     const previous = progress[stage.id];
     const nextProgress = {
       ...progress,
@@ -274,8 +334,13 @@ export function PhilosopherPuzzleGame() {
     setActiveStageId(null);
   }
 
+  function changeLocale(nextLocale: Locale) {
+    setLocale(nextLocale);
+    window.localStorage.setItem(LANGUAGE_STORAGE_KEY, nextLocale);
+  }
+
   function resetProgress() {
-    if (!window.confirm("Xóa toàn bộ sao và thời gian tốt nhất của bạn?")) return;
+    if (!window.confirm(copy.resetConfirm)) return;
 
     window.localStorage.removeItem(STORAGE_KEY);
     setProgress({});
@@ -292,23 +357,26 @@ export function PhilosopherPuzzleGame() {
       <main className="play-screen">
         <header className="play-header">
           <button className="text-button" onClick={returnToMap}>
-            ← Chọn màn
+            {copy.chooseStage}
           </button>
           <div className="chapter-marker">
-            Cấp {activeDifficulty.id} / Màn {activeStage.order}
+            {copy.level} {activeDifficulty.id} / {copy.stage} {activeStage.order}
           </div>
-          <button className="text-button" onClick={() => startStage(activeStage)}>
-            Chơi lại
-          </button>
+          <div className="play-header-actions">
+            <LanguageSwitcher copy={copy} locale={locale} onChange={changeLocale} />
+            <button className="text-button" onClick={() => startStage(activeStage)}>
+              {copy.replay}
+            </button>
+          </div>
         </header>
 
         <section className="play-layout">
           <aside className="portrait-panel">
-            <p className="eyebrow">Chân dung cần phục dựng</p>
+            <p className="eyebrow">{copy.portraitToRestore}</p>
             <div className="reference-image">
               <Image
                 src={activeStage.image}
-                alt={`Chân dung ${activeStage.name}`}
+                alt={`${copy.portraitAlt} ${activeStage.name}`}
                 fill
                 preload
                 sizes="(max-width: 990px) 132px, 310px"
@@ -321,18 +389,18 @@ export function PhilosopherPuzzleGame() {
             <blockquote>{activeStage.idea}</blockquote>
           </aside>
 
-          <section className="puzzle-panel" aria-label={`Màn ghép hình ${activeStage.name}`}>
+          <section className="puzzle-panel" aria-label={`${copy.puzzleLabel} ${activeStage.name}`}>
             <div className="play-metrics">
               <div>
-                <span>Thời gian</span>
+                <span>{copy.time}</span>
                 <strong>{formatSeconds(elapsedSeconds)}</strong>
               </div>
               <div>
-                <span>Lượt dịch</span>
+                <span>{copy.moves}</span>
                 <strong>{moves}</strong>
               </div>
               <div>
-                <span>Mục tiêu 3 sao</span>
+                <span>{copy.threeStarTarget}</span>
                 <strong>{formatSeconds(activeDifficulty.starTimes.three)}</strong>
               </div>
             </div>
@@ -349,7 +417,7 @@ export function PhilosopherPuzzleGame() {
                       }`}
                       key={tile}
                       onClick={() => moveTile(index)}
-                      aria-label={`Di chuyển mảnh ${tile + 1}`}
+                      aria-label={`${copy.moveTile} ${tile + 1}`}
                       style={{
                         backgroundImage: `url(${activeStage.image})`,
                         backgroundSize: `${activeDifficulty.gridSize * 100}% ${
@@ -373,9 +441,9 @@ export function PhilosopherPuzzleGame() {
 
             <div className="puzzle-actions">
               <button className="secondary-button" onClick={() => setShowNumbers(!showNumbers)}>
-                {showNumbers ? "Ẩn số gợi ý" : "Hiện số gợi ý"}
+                {showNumbers ? copy.hideHints : copy.showHints}
               </button>
-              <p>Chạm vào mảnh sát ô trống để dịch chuyển.</p>
+              <p>{copy.moveInstruction}</p>
             </div>
           </section>
         </section>
@@ -387,20 +455,20 @@ export function PhilosopherPuzzleGame() {
                 <Image src={activeStage.image} alt="" fill sizes="255px" />
               </div>
               <div className="story-content">
-                <p className="eyebrow">Hoàn thành · {formatSeconds(completion.seconds)}</p>
-                <Stars count={completion.stars} />
+                <p className="eyebrow">{copy.completed} · {formatSeconds(completion.seconds)}</p>
+                <Stars copy={copy} count={completion.stars} />
                 <h2 id="story-title">{activeStage.name}</h2>
                 <p className="story-meta">
                   {activeStage.era} · {activeStage.origin}
                 </p>
-                <PhilosopherStory stage={activeStage} />
+                <PhilosopherStory copy={copy} stage={activeStage} />
                 <div className="story-actions">
                   <button className="secondary-button" onClick={returnToMap}>
-                    Về bản đồ
+                    {copy.backToMap}
                   </button>
                   {nextStage && (
                     <button className="primary-button" onClick={() => startStage(nextStage)}>
-                      Màn kế tiếp →
+                      {copy.nextStage}
                     </button>
                   )}
                 </div>
@@ -416,48 +484,46 @@ export function PhilosopherPuzzleGame() {
     <main className="map-screen">
       <div className="glow glow-one" />
       <div className="glow glow-two" />
+      <LanguageSwitcher copy={copy} locale={locale} onChange={changeLocale} />
 
       <header className="hero">
         <div className="hero-copy">
-          <p className="eyebrow">Sliding puzzle · hành trình triết học</p>
+          <p className="eyebrow">{copy.heroEyebrow}</p>
           <h1>
-            Mảnh ghép
-            <span>Minh Triết</span>
+            {copy.heroTitleFirst}
+            <span>{copy.heroTitleSecond}</span>
           </h1>
-          <p className="hero-description">
-            Khôi phục chân dung của 15 triết gia. Ghép càng nhanh, bạn càng thu thập
-            nhiều sao và mở được những câu chuyện phía sau tư tưởng của họ.
-          </p>
+          <p className="hero-description">{copy.heroDescription}</p>
           <button
             className="primary-button"
             onClick={() => startStage(stages[Math.min(stats.finished, stages.length - 1)])}
           >
-            {stats.finished === 0 ? "Bắt đầu hành trình" : "Tiếp tục hành trình"} →
+            {stats.finished === 0 ? copy.startJourney : copy.continueJourney} →
           </button>
         </div>
 
-        <div className="progress-card" aria-label="Tiến độ người chơi">
-          <p className="eyebrow">Sổ hành trình</p>
+        <div className="progress-card" aria-label={copy.playerProgress}>
+          <p className="eyebrow">{copy.journeyJournal}</p>
           <div className="progress-numbers">
             <div>
               <strong>{stats.finished}</strong>
-              <span>/ 15 màn</span>
+              <span>{copy.stagesTotal}</span>
             </div>
             <div>
               <strong>{stats.stars}</strong>
-              <span>/ 45 sao</span>
+              <span>{copy.starsTotal}</span>
             </div>
           </div>
           <div className="progress-track">
             <span style={{ width: `${(stats.finished / stages.length) * 100}%` }} />
           </div>
           <button className="text-button reset-button" onClick={resetProgress}>
-            Xóa tiến độ
+            {copy.resetProgress}
           </button>
         </div>
       </header>
 
-      <section className="levels" aria-label="Danh sách cấp độ">
+      <section className="levels" aria-label={copy.levelList}>
         {difficulties.map((difficulty) => {
           const levelStages = stages.filter((stage) => stage.levelId === difficulty.id);
 
@@ -474,7 +540,7 @@ export function PhilosopherPuzzleGame() {
               <div className="stage-list">
                 {levelStages.map((stage) => {
                   const index = stages.findIndex((candidate) => candidate.id === stage.id);
-                  const unlocked = progressReady && isUnlocked(index, progress);
+                  const unlocked = progressReady && isUnlocked(index, progress, stages);
                   const record = progress[stage.id];
 
                   return (
@@ -486,12 +552,12 @@ export function PhilosopherPuzzleGame() {
                     >
                       <span className="stage-image">
                         <Image src={stage.image} alt="" fill sizes="62px" />
-                        {!unlocked && <span className="lock-label">Khóa</span>}
+                        {!unlocked && <span className="lock-label">{copy.locked}</span>}
                       </span>
                       <span className="stage-details">
-                        <span className="stage-index">Màn {stage.order.toString().padStart(2, "0")}</span>
+                        <span className="stage-index">{copy.stage} {stage.order.toString().padStart(2, "0")}</span>
                         <strong>{stage.name}</strong>
-                        {record ? <Stars count={record.stars} /> : <span className="unplayed">Chưa khám phá</span>}
+                        {record ? <Stars copy={copy} count={record.stars} /> : <span className="unplayed">{copy.undiscovered}</span>}
                       </span>
                       {record && <span className="best-time">{formatSeconds(record.bestSeconds)}</span>}
                     </button>
@@ -503,22 +569,19 @@ export function PhilosopherPuzzleGame() {
         })}
       </section>
 
-      <section className="story-library" aria-label="Câu chuyện đã mở khóa">
+      <section className="story-library" aria-label={copy.unlockedStories}>
         <header className="library-heading">
           <div>
-            <p className="eyebrow">Thư viện đã mở khóa</p>
-            <h2>Câu chuyện phía sau chân dung</h2>
+            <p className="eyebrow">{copy.libraryEyebrow}</p>
+            <h2>{copy.libraryTitle}</h2>
           </div>
-          <p>
-            Hoàn thành một màn để lưu hồ sơ nhân vật tại đây. Bạn có thể đọc lại bất cứ lúc nào
-            mà không cần chơi lại.
-          </p>
+          <p>{copy.libraryDescription}</p>
         </header>
 
         {discoveredStages.length === 0 ? (
           <div className="library-empty">
-            <span>Chưa có hồ sơ nào</span>
-            <p>Hoàn thành màn Socrates để mở câu chuyện đầu tiên.</p>
+            <span>{copy.emptyLibrary}</span>
+            <p>{copy.emptyLibraryDescription}</p>
           </div>
         ) : (
           <div className="archive-list">
@@ -528,15 +591,15 @@ export function PhilosopherPuzzleGame() {
                   <Image src={stage.image} alt="" fill sizes="112px" />
                 </div>
                 <div className="archive-body">
-                  <p className="stage-index">Hồ sơ {stage.order.toString().padStart(2, "0")}</p>
+                  <p className="stage-index">{copy.profile} {stage.order.toString().padStart(2, "0")}</p>
                   <h3>{stage.name}</h3>
                   <p className="archive-meta">
                     {stage.era} · {stage.origin}
                   </p>
                   <p className="archive-summary">{stage.story.summary}</p>
                   <details className="archive-details">
-                    <summary>Đọc câu chuyện đầy đủ</summary>
-                    <PhilosopherStory stage={stage} includeSummary={false} />
+                    <summary>{copy.readFullStory}</summary>
+                    <PhilosopherStory copy={copy} stage={stage} includeSummary={false} />
                   </details>
                 </div>
               </article>

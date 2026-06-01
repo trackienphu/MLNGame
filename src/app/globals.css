@@ -225,6 +225,44 @@ button:focus-visible {
   color: var(--gold-light);
 }
 
+.language-switcher {
+  align-items: center;
+  background: rgba(22, 21, 24, 0.88);
+  border: 1px solid rgba(218, 184, 122, 0.2);
+  border-radius: 999px;
+  display: inline-flex;
+  gap: 3px;
+  padding: 3px;
+}
+
+.map-screen > .language-switcher {
+  position: absolute;
+  right: clamp(20px, 5vw, 68px);
+  top: 20px;
+  z-index: 1;
+}
+
+.language-switcher button {
+  background: transparent;
+  border-radius: 999px;
+  color: #968b79;
+  font-size: 0.69rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  min-height: 29px;
+  padding: 0 11px;
+  transition: background 160ms ease, color 160ms ease;
+}
+
+.language-switcher button:hover {
+  color: #ead8b7;
+}
+
+.language-switcher button.active {
+  background: rgba(198, 149, 77, 0.2);
+  color: var(--gold-light);
+}
+
 .reset-button {
   margin-top: 26px;
 }
@@ -565,6 +603,12 @@ button:focus-visible {
   justify-content: space-between;
   margin: 0 auto 32px;
   max-width: 1180px;
+}
+
+.play-header-actions {
+  align-items: center;
+  display: flex;
+  gap: 18px;
 }
 
 .chapter-marker {
@@ -958,7 +1002,37 @@ button:focus-visible {
 
 @media (max-width: 640px) {
   .map-screen {
-    padding: 36px 16px 38px;
+    padding: 72px 16px 38px;
+  }
+
+  .map-screen > .language-switcher {
+    right: 16px;
+    top: 20px;
+  }
+
+  .play-header {
+    flex-wrap: wrap;
+    gap: 9px 12px;
+    height: auto;
+    min-height: 58px;
+    padding: 9px 0;
+  }
+
+  .chapter-marker {
+    order: 3;
+    padding-bottom: 3px;
+    text-align: center;
+    width: 100%;
+  }
+
+  .play-header-actions {
+    gap: 11px;
+  }
+
+  .play-header .language-switcher button {
+    font-size: 0.62rem;
+    min-height: 26px;
+    padding: 0 8px;
   }
 
   .hero {

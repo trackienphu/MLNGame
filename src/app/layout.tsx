@@ -15,9 +15,9 @@ const lora = Lora({
 });
 
 export const metadata: Metadata = {
-  title: "Mảnh Ghép Minh Triết | Sliding Puzzle",
+  title: "Mảnh Ghép Minh Triết | Pieces of Wisdom",
   description:
-    "Ghép chân dung 15 triết gia qua 5 cấp độ và mở khóa những câu chuyện tư tưởng.",
+    "Ghép chân dung 15 triết gia và mở khóa những câu chuyện tư tưởng. Restore 15 philosopher portraits and unlock the stories behind their ideas.",
 };
 
 export default function RootLayout({
