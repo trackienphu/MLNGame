@@ -123,6 +123,44 @@ function Stars({ count }: { count: number }) {
   );
 }
 
+function PhilosopherStory({
+  stage,
+  includeSummary = true,
+}: {
+  stage: PhilosopherStage;
+  includeSummary?: boolean;
+}) {
+  return (
+    <div className="philosopher-story">
+      {includeSummary && <p className="story-summary">{stage.story.summary}</p>}
+      <div className="story-chapters">
+        {stage.story.chapters.map((chapter) => (
+          <section key={chapter.title}>
+            <h3>{chapter.title}</h3>
+            <p>{chapter.body}</p>
+          </section>
+        ))}
+      </div>
+      <div className="story-reading-list">
+        <p>Tác phẩm và cửa ngõ đọc thêm</p>
+        <ul>
+          {stage.story.works.map((work) => (
+            <li key={work}>{work}</li>
+          ))}
+        </ul>
+      </div>
+      <a
+        className="story-source"
+        href={stage.story.sourceUrl}
+        rel="noreferrer"
+        target="_blank"
+      >
+        Đối chiếu nguồn: Stanford Encyclopedia of Philosophy ↗
+      </a>
+    </div>
+  );
+}
+
 export function PhilosopherPuzzleGame() {
   const [progress, setProgress] = useState<Progress>({});
   const [progressReady, setProgressReady] = useState(false);
@@ -174,6 +212,10 @@ export function PhilosopherPuzzleGame() {
     const stars = stages.reduce((sum, stage) => sum + (progress[stage.id]?.stars ?? 0), 0);
     return { finished, stars };
   }, [progress]);
+  const discoveredStages = useMemo(
+    () => stages.filter((stage) => Boolean(progress[stage.id])),
+    [progress],
+  );
 
   function persistProgress(nextProgress: Progress) {
     setProgress(nextProgress);
@@ -264,7 +306,13 @@ export function PhilosopherPuzzleGame() {
           <aside className="portrait-panel">
             <p className="eyebrow">Chân dung cần phục dựng</p>
             <div className="reference-image">
-              <Image src={activeStage.image} alt={`Chân dung ${activeStage.name}`} fill priority />
+              <Image
+                src={activeStage.image}
+                alt={`Chân dung ${activeStage.name}`}
+                fill
+                preload
+                sizes="(max-width: 990px) 132px, 310px"
+              />
             </div>
             <h1>{activeStage.name}</h1>
             <p className="era">
@@ -336,7 +384,7 @@ export function PhilosopherPuzzleGame() {
           <div className="story-backdrop" role="presentation">
             <article className="story-card" role="dialog" aria-modal="true" aria-labelledby="story-title">
               <div className="story-portrait">
-                <Image src={activeStage.image} alt="" fill />
+                <Image src={activeStage.image} alt="" fill sizes="255px" />
               </div>
               <div className="story-content">
                 <p className="eyebrow">Hoàn thành · {formatSeconds(completion.seconds)}</p>
@@ -345,7 +393,7 @@ export function PhilosopherPuzzleGame() {
                 <p className="story-meta">
                   {activeStage.era} · {activeStage.origin}
                 </p>
-                <p className="story-text">{activeStage.story}</p>
+                <PhilosopherStory stage={activeStage} />
                 <div className="story-actions">
                   <button className="secondary-button" onClick={returnToMap}>
                     Về bản đồ
@@ -437,7 +485,7 @@ export function PhilosopherPuzzleGame() {
                       onClick={() => startStage(stage)}
                     >
                       <span className="stage-image">
-                        <Image src={stage.image} alt="" fill />
+                        <Image src={stage.image} alt="" fill sizes="62px" />
                         {!unlocked && <span className="lock-label">Khóa</span>}
                       </span>
                       <span className="stage-details">
@@ -453,6 +501,48 @@ export function PhilosopherPuzzleGame() {
             </article>
           );
         })}
+      </section>
+
+      <section className="story-library" aria-label="Câu chuyện đã mở khóa">
+        <header className="library-heading">
+          <div>
+            <p className="eyebrow">Thư viện đã mở khóa</p>
+            <h2>Câu chuyện phía sau chân dung</h2>
+          </div>
+          <p>
+            Hoàn thành một màn để lưu hồ sơ nhân vật tại đây. Bạn có thể đọc lại bất cứ lúc nào
+            mà không cần chơi lại.
+          </p>
+        </header>
+
+        {discoveredStages.length === 0 ? (
+          <div className="library-empty">
+            <span>Chưa có hồ sơ nào</span>
+            <p>Hoàn thành màn Socrates để mở câu chuyện đầu tiên.</p>
+          </div>
+        ) : (
+          <div className="archive-list">
+            {discoveredStages.map((stage) => (
+              <article className="archive-card" key={stage.id}>
+                <div className="archive-portrait">
+                  <Image src={stage.image} alt="" fill sizes="112px" />
+                </div>
+                <div className="archive-body">
+                  <p className="stage-index">Hồ sơ {stage.order.toString().padStart(2, "0")}</p>
+                  <h3>{stage.name}</h3>
+                  <p className="archive-meta">
+                    {stage.era} · {stage.origin}
+                  </p>
+                  <p className="archive-summary">{stage.story.summary}</p>
+                  <details className="archive-details">
+                    <summary>Đọc câu chuyện đầy đủ</summary>
+                    <PhilosopherStory stage={stage} includeSummary={false} />
+                  </details>
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
       </section>
     </main>
   );
