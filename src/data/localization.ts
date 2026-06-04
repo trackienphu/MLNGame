@@ -57,6 +57,11 @@ export type UiCopy = {
   specialStageDescription: string;
   specialStageUnlocked: string;
   specialStageProfile: string;
+  footerTagline: string;
+  aboutUsLabel: string;
+  aboutUsTitle: string;
+  aboutUsDescription: string;
+  authorsLabel: string;
 };
 
 export const uiCopy: Record<Locale, UiCopy> = {
@@ -113,6 +118,12 @@ export const uiCopy: Record<Locale, UiCopy> = {
       "Một chân dung ngoài tuyến chính với 400 mảnh ghép. Màn đặc biệt luôn mở khóa và không ảnh hưởng tiến độ 15 màn thường.",
     specialStageUnlocked: "Luôn mở khóa",
     specialStageProfile: "Hồ sơ đặc biệt",
+    footerTagline: "Khôi phục chân dung triết gia qua từng mảnh ghép.",
+    aboutUsLabel: "Về chúng tôi",
+    aboutUsTitle: "Những người xây dựng nền tảng",
+    aboutUsDescription:
+      "Mảnh ghép Minh Triết được tạo ra như một trải nghiệm học tập nhỏ gọn, kết hợp game puzzle, dữ liệu nhân vật và kể chuyện song ngữ.",
+    authorsLabel: "Tác giả nền tảng",
   },
   en: {
     languageSwitcherLabel: "Choose language",
@@ -167,6 +178,12 @@ export const uiCopy: Record<Locale, UiCopy> = {
       "An off-path portrait with 400 tiles. This special stage is always unlocked and does not affect progress through the 15 regular stages.",
     specialStageUnlocked: "Always unlocked",
     specialStageProfile: "Special profile",
+    footerTagline: "Restore philosopher portraits one piece at a time.",
+    aboutUsLabel: "About us",
+    aboutUsTitle: "The people behind the platform",
+    aboutUsDescription:
+      "Pieces of Wisdom was created as a focused learning experience, bringing together puzzle play, character data, and bilingual storytelling.",
+    authorsLabel: "Platform authors",
   },
 };
 
