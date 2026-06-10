@@ -33,6 +33,10 @@ const localeOptions: { label: string; value: Locale }[] = [
   { label: "Tiếng Việt", value: "vi" },
   { label: "English", value: "en" },
 ];
+const platformAuthors = [
+  { name: "Trác Kiến Phú", role: "AI Engineer" },
+  { name: "Nguyễn Phước Phi Long", role: "Data Engineer" },
+];
 
 function formatSeconds(seconds: number) {
   const minutes = Math.floor(seconds / 60).toString().padStart(2, "0");
@@ -661,6 +665,43 @@ export function PhilosopherPuzzleGame() {
           </div>
         )}
       </section>
+
+      <footer className="site-footer" aria-labelledby="about-us-title">
+        <div className="footer-brand-column">
+          <div className="footer-brand">
+            <span className="footer-logo" aria-hidden="true">
+              <Image src="/favicon.ico" alt="" width={36} height={36} unoptimized />
+            </span>
+            <div>
+              <strong>{copy.heroTitleFirst} {copy.heroTitleSecond}</strong>
+              <p>{copy.footerTagline}</p>
+            </div>
+          </div>
+
+          <article className="author-card ai-tool-card">
+            <strong>{copy.aiToolName}</strong>
+            <span>{copy.aiToolDescription}</span>
+          </article>
+        </div>
+
+        <section className="footer-about" aria-label={copy.aboutUsLabel}>
+          <p className="eyebrow">{copy.aboutUsLabel}</p>
+          <h2 id="about-us-title">{copy.aboutUsTitle}</h2>
+          <p>{copy.aboutUsDescription}</p>
+        </section>
+
+        <section className="footer-authors" aria-label={copy.authorsLabel}>
+          <p>{copy.authorsLabel}</p>
+          <div className="author-list">
+            {platformAuthors.map((author) => (
+              <article className="author-card" key={author.name}>
+                <strong>{author.name}</strong>
+                <span>{author.role}</span>
+              </article>
+            ))}
+          </div>
+        </section>
+      </footer>
     </main>
   );
 }
