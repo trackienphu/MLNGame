@@ -62,8 +62,11 @@ export type UiCopy = {
   aboutUsTitle: string;
   aboutUsDescription: string;
   authorsLabel: string;
+<<<<<<< HEAD
   aiToolName: string;
   aiToolDescription: string;
+=======
+>>>>>>> 5d925fc48303ff23d94eb58a791b4d3da41b18aa
 };
 
 export const uiCopy: Record<Locale, UiCopy> = {
@@ -126,8 +129,11 @@ export const uiCopy: Record<Locale, UiCopy> = {
     aboutUsDescription:
       "Mảnh ghép Minh Triết được tạo ra như một trải nghiệm học tập nhỏ gọn, kết hợp game puzzle, dữ liệu nhân vật và kể chuyện song ngữ.",
     authorsLabel: "Tác giả nền tảng",
+<<<<<<< HEAD
     aiToolName: "Codex",
     aiToolDescription: "Công cụ AI hỗ trợ tạo nên nền tảng",
+=======
+>>>>>>> 5d925fc48303ff23d94eb58a791b4d3da41b18aa
   },
   en: {
     languageSwitcherLabel: "Choose language",
@@ -188,8 +194,11 @@ export const uiCopy: Record<Locale, UiCopy> = {
     aboutUsDescription:
       "Pieces of Wisdom was created as a focused learning experience, bringing together puzzle play, character data, and bilingual storytelling.",
     authorsLabel: "Platform authors",
+<<<<<<< HEAD
     aiToolName: "Codex",
     aiToolDescription: "AI tool used to build the platform",
+=======
+>>>>>>> 5d925fc48303ff23d94eb58a791b4d3da41b18aa
   },
 };
 

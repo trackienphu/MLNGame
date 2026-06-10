@@ -1082,12 +1082,15 @@ button:focus-visible {
   padding-top: 34px;
 }
 
+<<<<<<< HEAD
 .footer-brand-column {
   display: grid;
   gap: 18px;
   min-width: 0;
 }
 
+=======
+>>>>>>> 5d925fc48303ff23d94eb58a791b4d3da41b18aa
 .footer-brand {
   align-items: center;
   display: flex;
@@ -1190,10 +1193,13 @@ button:focus-visible {
   margin-top: 3px;
 }
 
+<<<<<<< HEAD
 .ai-tool-card {
   max-width: 290px;
 }
 
+=======
+>>>>>>> 5d925fc48303ff23d94eb58a791b4d3da41b18aa
 @media (max-width: 990px) {
   .hero,
   .play-layout {
