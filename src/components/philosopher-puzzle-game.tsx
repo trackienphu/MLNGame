@@ -667,7 +667,6 @@ export function PhilosopherPuzzleGame() {
       </section>
 
       <footer className="site-footer" aria-labelledby="about-us-title">
-<<<<<<< HEAD
         <div className="footer-brand-column">
           <div className="footer-brand">
             <span className="footer-logo" aria-hidden="true">
@@ -683,16 +682,6 @@ export function PhilosopherPuzzleGame() {
             <strong>{copy.aiToolName}</strong>
             <span>{copy.aiToolDescription}</span>
           </article>
-=======
-        <div className="footer-brand">
-          <span className="footer-logo" aria-hidden="true">
-            <Image src="/favicon.ico" alt="" width={36} height={36} unoptimized />
-          </span>
-          <div>
-            <strong>{copy.heroTitleFirst} {copy.heroTitleSecond}</strong>
-            <p>{copy.footerTagline}</p>
-          </div>
->>>>>>> 5d925fc48303ff23d94eb58a791b4d3da41b18aa
         </div>
 
         <section className="footer-about" aria-label={copy.aboutUsLabel}>
